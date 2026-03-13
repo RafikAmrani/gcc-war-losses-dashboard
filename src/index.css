@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0a0a0a;
+  color: #e5e7eb;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Bloomberg-style scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+/* Ticker animation */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-content {
+  animation: ticker 40s linear infinite;
+  white-space: nowrap;
+}
+.ticker-content:hover {
+  animation-play-state: paused;
+}
+
+/* Number flash */
+@keyframes flash-red {
+  0%, 100% { color: inherit; }
+  50% { color: #ef4444; }
+}
+@keyframes flash-green {
+  0%, 100% { color: inherit; }
+  50% { color: #22c55e; }
+}
+.flash-red { animation: flash-red 0.5s ease; }
+.flash-green { animation: flash-green 0.5s ease; }
