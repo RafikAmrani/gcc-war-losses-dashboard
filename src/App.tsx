@@ -9,14 +9,12 @@ import EventsLog from './components/EventsLog'
 import { CATEGORY_META } from './data/losses'
 import type { CountrySummary, Category } from './types'
 import { useLosses } from './hooks/useLosses'
+import { formatMillions } from './utils/formatters'
 import { BarChart2, Globe, List, Clock, AlertTriangle, RefreshCw } from 'lucide-react'
 
 type Tab = 'overview' | 'countries' | 'categories' | 'timeline' | 'events'
 
-function fmt(n: number) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(2)}B`
-  return `$${n}M`
-}
+const fmt = formatMillions
 
 const TABS: { id: Tab; label: string; icon: typeof Globe }[] = [
   { id: 'overview',    label: 'OVERVIEW',     icon: Globe    },
@@ -166,9 +164,19 @@ export default function App() {
               }
             </div>
 
-            {/* Category top row */}
+            {/* Category top row — dynamic top 4 by GCC total */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-bloomberg-border">
-              {(['oil_revenue', 'trade', 'airlines', 'interceptors'] as Category[]).map(cat => {
+              {(loading
+                ? (Object.keys(CATEGORY_META) as Category[]).slice(0, 4)
+                : (Object.keys(CATEGORY_META) as Category[])
+                    .map(cat => ({
+                      cat,
+                      total: sorted.reduce((s, c) => s + (c.byCategory[cat] || 0), 0),
+                    }))
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 4)
+                    .map(x => x.cat)
+              ).map(cat => {
                 const total = sorted.reduce((s, c) => s + (c.byCategory[cat] || 0), 0)
                 const meta = CATEGORY_META[cat]
                 return (

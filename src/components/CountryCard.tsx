@@ -1,6 +1,7 @@
 import type { CountrySummary } from '../types'
 import { CATEGORY_META } from '../data/losses'
 import { TrendingUp } from 'lucide-react'
+import { formatMillions } from '../utils/formatters'
 
 interface Props {
   summary: CountrySummary
@@ -9,10 +10,7 @@ interface Props {
   active: boolean
 }
 
-function fmt(n: number) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(2)}B`
-  return `$${n}M`
-}
+const fmt = formatMillions
 
 export default function CountryCard({ summary, rank, onClick, active }: Props) {
   const topCategories = Object.entries(summary.byCategory)
