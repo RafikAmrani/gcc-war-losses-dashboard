@@ -1,3 +1,10 @@
+# Backend
+.env
+backend/cache/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+
 # Logs
 logs
 *.log

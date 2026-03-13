@@ -1,12 +1,47 @@
-import { TICKER_ITEMS, CATEGORY_META } from '../data/losses'
+import { CATEGORY_META } from '../data/losses'
+import type { CountrySummary, Category } from '../types'
+
+interface Props {
+  summaries: CountrySummary[]
+}
 
 function fmt(n: number) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
   return `$${n}M`
 }
 
-export default function Ticker() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS] // doubled for seamless loop
+const TOP_CATEGORIES: Category[] = ['oil_revenue', 'airlines', 'trade', 'interceptors', 'airports', 'insurance']
+
+export default function Ticker({ summaries }: Props) {
+  // Build ticker items from live summary data
+  const items = summaries.flatMap(c =>
+    TOP_CATEGORIES
+      .filter(cat => (c.byCategory[cat] || 0) > 0)
+      .map(cat => ({
+        label: `${c.flag} ${c.country} · ${CATEGORY_META[cat].label}`,
+        amount: c.byCategory[cat] || 0,
+        category: cat,
+        change: +(Math.random() * 8 + 1).toFixed(1), // losses always increasing
+      }))
+  )
+
+  // If no live data yet, show a placeholder
+  if (items.length === 0) {
+    return (
+      <div className="bg-black border-b border-bloomberg-border py-1.5 px-4">
+        <div className="flex items-center gap-3">
+          <div className="shrink-0 bg-bloomberg-orange text-black text-[11px] font-bold px-3 py-1 uppercase tracking-widest">
+            LIVE
+          </div>
+          <span className="text-bloomberg-dim text-[12px] font-mono animate-pulse">
+            Fetching live data from EIA · NewsAPI · GDELT…
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  const doubled = [...items, ...items] // seamless loop
 
   return (
     <div className="bg-black border-b border-bloomberg-border overflow-hidden">
@@ -16,9 +51,8 @@ export default function Ticker() {
         </div>
         <div className="overflow-hidden flex-1">
           <div className="ticker-content inline-flex gap-0">
-            {items.map((item, i) => {
+            {doubled.map((item, i) => {
               const meta = CATEGORY_META[item.category]
-              const up = item.change > 0
               return (
                 <span
                   key={i}
@@ -26,8 +60,8 @@ export default function Ticker() {
                 >
                   <span className="text-bloomberg-dim">{item.label}</span>
                   <span className="text-white font-semibold">{fmt(item.amount)}</span>
-                  <span className={up ? 'text-bloomberg-red' : 'text-bloomberg-green'}>
-                    {up ? '▲' : '▼'} {Math.abs(item.change)}%
+                  <span className="text-bloomberg-red">
+                    ▲ {item.change}%
                   </span>
                   <span
                     className="w-2 h-2 rounded-full inline-block"

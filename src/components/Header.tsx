@@ -1,5 +1,6 @@
-import { TOTAL_LOSS } from '../data/losses'
 import { Clock } from 'lucide-react'
+
+const TOTAL_LOSS = 0 // legacy stub — component unused, superseded by App.tsx header
 
 function fmt(n: number) {
   if (n >= 1000) return `$${(n / 1000).toFixed(2)}B`

@@ -1,12 +1,37 @@
 # GCC War Cost Tracker
 
-A Bloomberg-terminal-style dashboard tracking the estimated economic losses sustained by GCC countries as a result of the US–Iran military conflict (April–June 2025).
+A Bloomberg-terminal-style dashboard tracking the estimated economic losses sustained by GCC countries as a result of the US–Iran military conflict (February 27, 2026 – present).
 
 ## Overview
 
 The dashboard aggregates and visualises financial damage across six Gulf Cooperation Council countries — **Saudi Arabia, UAE, Qatar, Kuwait, Oman, and Bahrain** — broken down by loss category, country, and timeline.
 
-**Total estimated losses tracked: ~$59.76B**
+Live data is fetched from real public APIs and refreshed automatically in the background. Loss figures are calculated dynamically based on live oil prices, conflict duration, and OPEC export baselines.
+
+**Total estimated losses: ~$189B and accumulating (Day 14)**
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────┐        ┌──────────────────────────────┐
+│   React Frontend (Vite)     │  /api  │   FastAPI Backend (Python)   │
+│   localhost:5173            │◄──────►│   localhost:8000             │
+│                             │        │                              │
+│  useLosses() hook           │        │  /api/losses/summary         │
+│  useEvents() hook           │        │  /api/losses/timeline        │
+│  Live ticker                │        │  /api/events                 │
+│  5 dashboard views          │        │  /api/oil/current            │
+└─────────────────────────────┘        │  /api/gdp                    │
+                                       └──────────┬───────────────────┘
+                                                  │
+                          ┌───────────────────────┼───────────────────┐
+                          ▼                       ▼                   ▼
+                   EIA API (oil)           GDELT v2 (news)     World Bank (GDP)
+                   Brent crude             Conflict events      Country GDP data
+                   refreshed 15min         refreshed 30min      refreshed 24h
+```
 
 ---
 
@@ -27,20 +52,16 @@ The dashboard aggregates and visualises financial damage across six Gulf Coopera
 
 ## Data Sources
 
-All figures are estimates compiled from publicly available reporting. No proprietary data is used.
+| Source | Used For | Refresh |
+|---|---|---|
+| **EIA (US Energy Information Administration)** | Live Brent crude oil price, pre-conflict baseline | Every 15 min |
+| **GDELT Project v2** | Real-time conflict news events from global media | Every 30 min |
+| **World Bank API** | Country GDP figures for loss-ratio calculations | Every 24h |
+| **NewsAPI** *(optional)* | Additional headline news (requires API key) | Every 30 min |
 
-| Source | Used For |
-|---|---|
-| **IATA** | Airport closure durations, airline revenue impact, passenger data |
-| **Bloomberg Commodities** | Oil price spreads, Brent futures, export volume changes |
-| **IISS (International Institute for Strategic Studies)** | Interceptor costs, munitions expenditure estimates |
-| **Saudi Aramco / QatarEnergy press releases** | Force majeure declarations, production cut announcements |
-| **DP World / Port operator reports** | Container throughput decline, port closure durations |
-| **Lloyd's of London / Marine market data** | War-risk insurance premium changes |
-| **IMF World Economic Outlook** | GDP revision estimates, macroeconomic impact |
-| **Reuters / AP / Financial Times** | Event dates, confirmation of incidents |
+Loss calculations use live oil prices against 30-day pre-conflict baselines (Feb 27, 2026), scaled to each country's OPEC export volume and conflict disruption phase.
 
-> ⚠️ **Disclaimer:** All figures are estimates based on public data and analyst reports. This dashboard is for informational and research purposes only. Numbers should not be used for financial or investment decisions.
+> ⚠️ **Disclaimer:** All figures are estimates based on public data and automated calculations. This dashboard is for informational and research purposes only. Numbers should not be used for financial or investment decisions.
 
 ---
 
@@ -48,62 +69,113 @@ All figures are estimates compiled from publicly available reporting. No proprie
 
 | Layer | Technology |
 |---|---|
-| Framework | [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org) |
-| Build Tool | [Vite 8](https://vite.dev) |
+| Frontend framework | [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org) |
+| Build tool | [Vite](https://vite.dev) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com) |
-| Charts | [Recharts](https://recharts.org) (Bar, Line, Pie, Radar) |
-| Icons | [Lucide React](https://lucide.dev) |
-| Fonts | [Inter](https://fonts.google.com/specimen/Inter) (Google Fonts) |
+| Charts | [Recharts](https://recharts.org) |
+| Backend | [FastAPI](https://fastapi.tiangolo.com) + [Python 3.13](https://python.org) |
+| HTTP client | [httpx](https://www.python-httpx.org) (async) |
+| Scheduler | [APScheduler](https://apscheduler.readthedocs.io) |
 
 ---
 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── Ticker.tsx             # Live scrolling banner at the top
-│   ├── CountryCard.tsx        # Per-country summary card with mini-bars
-│   ├── CountryDetail.tsx      # Full country breakdown (bars + radar chart)
-│   ├── CategoryBreakdown.tsx  # GCC-wide category analysis (stacked bar + pie)
-│   ├── TimelineChart.tsx      # Cumulative loss timeline (line chart)
-│   └── EventsLog.tsx          # Filterable/sortable events table
-├── data/
-│   └── losses.ts              # All data: events, country summaries, ticker items
-├── types/
-│   └── index.ts               # TypeScript type definitions
-└── App.tsx                    # Main layout, tabs, navigation
+├── backend/
+│   ├── main.py               # FastAPI app, routes
+│   ├── config.py             # API keys, conflict start date
+│   ├── models.py             # Pydantic response models
+│   ├── cache.py              # TTL-based JSON file cache
+│   ├── scheduler.py          # Background refresh jobs
+│   ├── calculations/
+│   │   └── losses.py         # Loss estimation engine
+│   ├── fetchers/
+│   │   ├── oil.py            # EIA Brent crude fetcher
+│   │   ├── news.py           # GDELT + NewsAPI fetcher
+│   │   └── gdp.py            # World Bank GDP fetcher
+│   ├── cache/                # Cached API responses (auto-created)
+│   ├── .env                  # API keys (not committed)
+│   └── requirements.txt
+└── src/
+    ├── api/
+    │   └── client.ts         # API fetch wrapper
+    ├── hooks/
+    │   ├── useLosses.ts       # Polls /api/losses/* every 5 min
+    │   └── useEvents.ts       # Polls /api/events every 5 min
+    ├── components/
+    │   ├── Ticker.tsx
+    │   ├── Header.tsx
+    │   ├── CountryDetail.tsx
+    │   ├── CategoryBreakdown.tsx
+    │   ├── TimelineChart.tsx
+    │   └── EventsLog.tsx
+    ├── data/
+    │   └── losses.ts         # Static metadata (flags, category labels)
+    ├── types/
+    │   └── index.ts
+    └── App.tsx
 ```
 
 ---
 
 ## Running Locally
 
+### 1. Start the backend
+
 ```bash
-npm install
+cd /path/to/degats
+
+# Install Python dependencies (first time only)
+pip install -r backend/requirements.txt
+
+# Add your EIA API key
+echo "EIA_API_KEY=your_key_here" > backend/.env
+
+# Start the backend (keep this terminal open)
+uvicorn backend.main:app --port 8000
+```
+
+Get a free EIA API key at [https://www.eia.gov/opendata/](https://www.eia.gov/opendata/).
+
+### 2. Start the frontend
+
+```bash
+npm install       # first time only
 npm run dev
 ```
 
-Then open [http://localhost:5173](http://localhost:5173).
+Open [http://localhost:5173](http://localhost:5173).
 
-```bash
-npm run build    # production build
-npm run preview  # serve the production build locally
+The frontend proxies `/api/*` requests to the backend automatically via Vite's dev proxy.
+
+### Optional API keys
+
+Add these to `backend/.env` for additional data sources:
+
+```env
+EIA_API_KEY=your_eia_key          # required — live oil prices
+NEWS_API_KEY=your_newsapi_key     # optional — additional headlines
+ALPHA_VANTAGE_KEY=your_av_key    # optional — reserved for future use
 ```
+
+---
+
+## Deployment note
+
+The backend currently runs on your local machine. To make the dashboard accessible to others:
+- Deploy the FastAPI backend to a cloud service (Railway, Render, Fly.io, etc.)
+- Update the Vite proxy target to point to the deployed backend URL
+- Build and deploy the frontend to Vercel, Netlify, or similar
 
 ---
 
 ## Features
 
 - **Bloomberg-style dark UI** — monospace fonts, orange accents, dense data layout
-- **Live ticker** — scrolling headline losses across the top
+- **Live Brent crude price** in the header, updated from EIA every 15 minutes
+- **Live ticker** — scrolling losses with real oil-price-driven figures
 - **5 views**: Overview · By Country · By Category · Timeline · Events Log
 - **Interactive** — click any country card to drill into its full breakdown
-- **Filterable events log** — filter by country and category, sort by date or amount
-- **Confidence levels** — each event tagged as Confirmed / Estimated / Projected
-
----
-
-## Contributing
-
-Data corrections and additions are welcome. Open an issue or PR with a source citation for any figure you'd like to update.
+- **Real conflict news** — GDELT pulls live events from global media coverage
+- **Auto-refresh** — frontend polls backend every 5 minutes; backend refreshes APIs in background

@@ -1,5 +1,6 @@
 import type { CountrySummary, Category } from '../types'
-import { CATEGORY_META, LOSS_EVENTS } from '../data/losses'
+import { CATEGORY_META } from '../data/losses'
+import { useEvents } from '../hooks/useEvents'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ResponsiveContainer, Tooltip
@@ -17,7 +18,7 @@ function fmt(n: number) {
 const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'other']
 
 export default function CountryDetail({ summary }: Props) {
-  const events = LOSS_EVENTS.filter(e => e.country === summary.country)
+  const { events, loading } = useEvents(summary.country)
   const catMax = Math.max(...CATEGORIES.map(c => summary.byCategory[c] || 0))
 
   const radarData = CATEGORIES.map(cat => ({
@@ -28,13 +29,12 @@ export default function CountryDetail({ summary }: Props) {
 
   return (
     <div className="bg-bloomberg-panel border border-bloomberg-border">
-      {/* Country header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-bloomberg-border">
         <div className="flex items-center gap-3">
           <span className="text-[40px]">{summary.flag}</span>
           <div>
             <h2 className="text-white text-[24px] font-bold leading-none">{summary.country}</h2>
-            <p className="text-bloomberg-dim text-[14px] font-mono mt-1">US–Iran War Economic Damage Report</p>
+            <p className="text-bloomberg-dim text-[14px] font-mono mt-1">US-Iran War Economic Damage Report</p>
           </div>
         </div>
         <div className="text-right">
@@ -44,11 +44,8 @@ export default function CountryDetail({ summary }: Props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-        {/* Category breakdown bars */}
         <div className="p-6 border-r border-bloomberg-border">
-          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-4">
-            Loss by Category
-          </div>
+          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-4">Loss by Category</div>
           <div className="space-y-3">
             {CATEGORIES.map(cat => {
               const val = summary.byCategory[cat] || 0
@@ -58,19 +55,14 @@ export default function CountryDetail({ summary }: Props) {
               return (
                 <div key={cat}>
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-bloomberg-text text-[14px] font-mono">
-                      {meta.icon} {meta.label}
-                    </span>
+                    <span className="text-bloomberg-text text-[14px] font-mono">{meta.icon} {meta.label}</span>
                     <div className="flex items-center gap-3">
                       <span className="text-bloomberg-dim text-[13px] font-mono">{pct.toFixed(1)}%</span>
                       <span className="text-white font-bold font-mono text-[15px] w-20 text-right">{fmt(val)}</span>
                     </div>
                   </div>
                   <div className="h-1.5 bg-bloomberg-border rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${pct}%`, background: meta.color }}
-                    />
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: meta.color }} />
                   </div>
                 </div>
               )
@@ -78,26 +70,13 @@ export default function CountryDetail({ summary }: Props) {
           </div>
         </div>
 
-        {/* Radar chart */}
         <div className="p-6">
-          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-2">
-            Exposure Profile
-          </div>
+          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-2">Exposure Profile</div>
           <ResponsiveContainer width="100%" height={240}>
             <RadarChart data={radarData}>
               <PolarGrid stroke="#1e1e1e" />
-              <PolarAngleAxis
-                dataKey="subject"
-                tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}
-              />
-              <Radar
-                name={summary.country}
-                dataKey="value"
-                stroke="#f97316"
-                fill="#f97316"
-                fillOpacity={0.15}
-                strokeWidth={1.5}
-              />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }} />
+              <Radar name={summary.country} dataKey="value" stroke="#f97316" fill="#f97316" fillOpacity={0.15} strokeWidth={1.5} />
               <Tooltip
                 contentStyle={{ background: '#111', border: '1px solid #1e1e1e', fontFamily: 'monospace', fontSize: 11 }}
                 formatter={(v) => [fmt(Number(v))]}
@@ -107,12 +86,12 @@ export default function CountryDetail({ summary }: Props) {
         </div>
       </div>
 
-      {/* Events for this country */}
       <div className="border-t border-bloomberg-border">
-        <div className="px-6 py-3 border-b border-bloomberg-border">
+        <div className="px-6 py-3 border-b border-bloomberg-border flex items-center justify-between">
           <span className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest">
-            Loss Events ({events.length})
+            Loss Events ({loading ? '...' : events.length})
           </span>
+          {loading && <span className="text-bloomberg-dim text-[12px] font-mono animate-pulse">Loading from NewsAPI / GDELT...</span>}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px] font-mono">
@@ -125,19 +104,24 @@ export default function CountryDetail({ summary }: Props) {
             </thead>
             <tbody>
               {events.map((e, i) => {
-                const meta = CATEGORY_META[e.category]
+                const meta = CATEGORY_META[e.category as Category]
                 return (
                   <tr key={e.id} className={`border-b border-bloomberg-border hover:bg-bloomberg-surface ${i % 2 === 0 ? '' : 'bg-black/10'}`}>
                     <td className="px-4 py-2.5 text-bloomberg-dim">{e.date}</td>
-                    <td className="px-4 py-2.5">
-                      <span style={{ color: meta.color }}>{meta.icon} {meta.label}</span>
-                    </td>
+                    <td className="px-4 py-2.5"><span style={{ color: meta?.color }}>{meta?.icon} {meta?.label}</span></td>
                     <td className="px-4 py-2.5 text-bloomberg-dim max-w-xs">{e.description}</td>
                     <td className="px-4 py-2.5 text-white font-bold">{fmt(e.amount)}</td>
                     <td className="px-4 py-2.5 text-bloomberg-muted text-[12px]">{e.source}</td>
                   </tr>
                 )
               })}
+              {!loading && events.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-center text-bloomberg-muted text-[13px]">
+                    No events found. Configure API keys to pull live data.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
