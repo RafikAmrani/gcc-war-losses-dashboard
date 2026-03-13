@@ -55,12 +55,26 @@ export const CATEGORY_META: Record<Category, CategoryMeta> = {
     icon: '📋',
     description: 'Spiked war-risk insurance premiums on shipping, aviation, and energy infrastructure',
   },
-  other: {
-    id: 'other',
-    label: 'Other Losses',
-    color: '#6b7280',
-    icon: '💰',
-    description: 'FDI outflows, currency depreciation, stock market losses, and miscellaneous impacts',
+  equity: {
+    id: 'equity',
+    label: 'Equity Markets',
+    color: '#f43f5e',
+    icon: '📉',
+    description: 'Stock market decline on Tadawul, DFM, ADX, QSE and other GCC exchanges (free-float adjusted)',
+  },
+  fdi: {
+    id: 'fdi',
+    label: 'FDI Freeze',
+    color: '#a855f7',
+    icon: '🏦',
+    description: 'Foreign direct investment cancellations, project delays, and capital flight over 3-month horizon',
+  },
+  real_estate: {
+    id: 'real_estate',
+    label: 'Real Estate',
+    color: '#64748b',
+    icon: '🏗️',
+    description: 'Property transaction slowdown, developer delays, and falling valuations in Gulf markets',
   },
 }
 

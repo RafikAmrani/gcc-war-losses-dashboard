@@ -52,6 +52,26 @@ AIRLINE_DAILY_REV_M: dict[str, float] = {
     "Oman": 15.0,            # Oman Air + SalamAir
 }
 
+# Annual FDI inflows (USD billions, World Bank 2024 estimates)
+FDI_ANNUAL_B: dict[str, float] = {
+    "Saudi Arabia": 15.0,
+    "UAE": 22.0,
+    "Kuwait": 3.0,
+    "Qatar": 5.0,
+    "Bahrain": 1.5,
+    "Oman": 2.5,
+}
+
+# Annual real estate transaction volume (USD billions, 2024)
+REAL_ESTATE_ANNUAL_B: dict[str, float] = {
+    "Saudi Arabia": 50.0,
+    "UAE": 65.0,
+    "Kuwait": 8.0,
+    "Qatar": 10.0,
+    "Bahrain": 3.0,
+    "Oman": 4.0,
+}
+
 # Country flags
 COUNTRY_FLAGS: dict[str, str] = {
     "Saudi Arabia": "🇸🇦",

@@ -6,7 +6,7 @@ import { useEvents } from '../hooks/useEvents'
 import { formatMillions } from '../utils/formatters'
 
 const COUNTRIES: Country[] = ['UAE', 'Saudi Arabia', 'Kuwait', 'Qatar', 'Bahrain', 'Oman']
-const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'other']
+const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'equity', 'fdi', 'real_estate']
 
 const fmt = formatMillions
 

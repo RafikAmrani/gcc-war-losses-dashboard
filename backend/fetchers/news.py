@@ -47,8 +47,12 @@ CATEGORY_KEYWORDS: dict[str, list[str]] = {
                 "travel warning", "evacuation"],
     "insurance": ["insurance", "premium", "war risk", "lloyd", "underwriter",
                   "war clause", "hull"],
-    "other": ["stock", "market", "equity", "index", "fdi", "investment",
-              "currency", "economy", "gdp"],
+    "equity": ["stock market", "stock exchange", "equity", "share price", "tadawul",
+               "dfm", "adx", "qse", "kse", "index drop", "market crash", "bourse"],
+    "fdi": ["foreign investment", "fdi", "investor confidence", "capital flight",
+            "business climate", "investment freeze", "project delay", "divestment"],
+    "real_estate": ["real estate", "property market", "housing", "construction halt",
+                    "developer", "mortgage", "property prices", "real-estate"],
 }
 
 # Estimated USD-million range per category per event
@@ -60,7 +64,9 @@ CATEGORY_AMOUNTS: dict[str, tuple[float, float]] = {
     "trade": (100, 400),
     "tourism": (20, 120),
     "insurance": (30, 180),
-    "other": (50, 280),
+    "equity": (150, 600),
+    "fdi": (50, 300),
+    "real_estate": (30, 200),
 }
 
 

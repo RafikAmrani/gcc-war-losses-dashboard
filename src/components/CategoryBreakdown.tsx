@@ -17,7 +17,7 @@ function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-bloomberg-surface rounded ${className ?? ''}`} />
 }
 
-const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'other']
+const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'equity', 'fdi', 'real_estate']
 
 export default function CategoryBreakdown({ summaries, loading }: Props) {
   const categoryTotals = CATEGORIES.map(cat => {

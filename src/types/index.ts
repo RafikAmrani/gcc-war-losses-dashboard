@@ -6,7 +6,9 @@ export type Category =
   | 'trade'
   | 'tourism'
   | 'insurance'
-  | 'other'
+  | 'equity'
+  | 'fdi'
+  | 'real_estate'
 
 export type Country = 'UAE' | 'Saudi Arabia' | 'Kuwait' | 'Qatar' | 'Bahrain' | 'Oman'
 

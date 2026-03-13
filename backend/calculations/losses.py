@@ -13,13 +13,15 @@ from ..config import (
     MARKET_CAPS_B,
     AIRPORT_DAILY_REV_M,
     AIRLINE_DAILY_REV_M,
+    FDI_ANNUAL_B,
+    REAL_ESTATE_ANNUAL_B,
     COUNTRY_FLAGS,
 )
 
 COUNTRIES = list(OIL_EXPORTS_MBD.keys())
 CATEGORIES = [
     "interceptors", "oil_revenue", "airports", "airlines",
-    "trade", "tourism", "insurance", "other",
+    "trade", "tourism", "insurance", "equity", "fdi", "real_estate",
 ]
 
 
@@ -127,11 +129,21 @@ def compute_losses(oil: dict, news_events: list[dict]) -> dict:
         tourism_loss = tourism_daily * 0.70 * days
         by_cat["tourism"] = round(tourism_loss, 1)
 
-        # ── 7. Stock market / FDI losses ─────────────────────────────────────
-        # Estimate: 3 % immediate market cap decline + 0.1 %/day erosion
+        # ── 7a. Equity market losses (free-float adjusted) ────────────────
+        # Free float ≈ 20 % of total market cap (rest is state/anchor-held)
+        # Shock: 1.0 % immediate drop + 0.01 %/day erosion
         mktcap_m = MARKET_CAPS_B[country] * 1_000  # USD millions
-        stock_loss = mktcap_m * 0.03 + mktcap_m * 0.001 * days
-        by_cat["other"] = round(stock_loss, 1)
+        equity_loss = mktcap_m * 0.20 * (0.010 + 0.0001 * days)
+        by_cat["equity"] = round(equity_loss, 1)
+
+        # ── 7b. FDI freeze (3-month forward impact, 50 % disruption) ─────
+        # War-risk premium delays/cancels H1 2026 pipeline commitments
+        fdi_loss = FDI_ANNUAL_B[country] * 1_000 * 0.50 * (3 / 12)
+        by_cat["fdi"] = round(fdi_loss, 1)
+
+        # ── 7c. Real estate slowdown (3-month, 20 % transaction decline) ─
+        re_loss = REAL_ESTATE_ANNUAL_B[country] * 1_000 * 0.20 * (3 / 12)
+        by_cat["real_estate"] = round(re_loss, 1)
 
         # ── 8. Interceptors (from confirmed news events) ─────────────────────
         interceptor_from_news = sum(
@@ -247,10 +259,12 @@ def _cumulative_for_day(days_elapsed: int, oil: dict) -> dict[str, float]:
             # Tourism
             total += AIRPORT_DAILY_REV_M[country] * 0.30 * 0.70
 
-        # Stock (one-time at start + daily erosion)
+        # Equity / FDI / Real estate (same calibration as compute_losses)
         if days_elapsed > 0:
             mktcap_m = MARKET_CAPS_B[country] * 1_000
-            total += mktcap_m * 0.03 + mktcap_m * 0.001 * days_elapsed
+            total += mktcap_m * 0.20 * (0.010 + 0.0001 * days_elapsed)
+            total += FDI_ANNUAL_B[country] * 1_000 * 0.50 * (3 / 12)
+            total += REAL_ESTATE_ANNUAL_B[country] * 1_000 * 0.20 * (3 / 12)
 
         # Interceptors — rough linear per-day estimate
         total += _interceptor_estimate(country, days_elapsed)
