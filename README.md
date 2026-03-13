@@ -15,16 +15,18 @@ Live data is fetched from real public APIs and refreshed automatically in the ba
 ## Architecture
 
 ```
-┌─────────────────────────────┐        ┌──────────────────────────────┐
-│   React Frontend (Vite)     │  /api  │   FastAPI Backend (Python)   │
-│   localhost:5173            │◄──────►│   localhost:8000             │
-│                             │        │                              │
-│  useLosses() hook           │        │  /api/losses/summary         │
-│  useEvents() hook           │        │  /api/losses/timeline        │
-│  Live ticker                │        │  /api/events                 │
-│  5 dashboard views          │        │  /api/oil/current            │
-└─────────────────────────────┘        │  /api/gdp                    │
-                                       └──────────┬───────────────────┘
+┌─────────────────────────────┐        ┌──────────────────────────────────────────────────┐
+│   React Frontend (Vite)     │  /api  │   FastAPI Backend (Python)                       │
+│   Vercel / local            │◄──────►│   Railway (production)                           │
+│                             │        │   gcc-war-losses-dashboard-production.up.        │
+│  useLosses() hook           │        │   railway.app                                    │
+│  useEvents() hook           │        │                                                  │
+│  Live ticker                │        │  /api/losses/summary                             │
+│  5 dashboard views          │        │  /api/losses/timeline                            │
+└─────────────────────────────┘        │  /api/events                                     │
+                                       │  /api/oil/current                                │
+                                       │  /api/gdp                                        │
+                                       └──────────┬───────────────────────────────────────┘
                                                   │
                           ┌───────────────────────┼───────────────────┐
                           ▼                       ▼                   ▼
@@ -161,12 +163,31 @@ ALPHA_VANTAGE_KEY=your_av_key    # optional — reserved for future use
 
 ---
 
-## Deployment note
+## Deployment
 
-The backend currently runs on your local machine. To make the dashboard accessible to others:
-- Deploy the FastAPI backend to a cloud service (Railway, Render, Fly.io, etc.)
-- Update the Vite proxy target to point to the deployed backend URL
-- Build and deploy the frontend to Vercel, Netlify, or similar
+### Backend — Railway (live)
+
+The FastAPI backend is deployed on Railway:
+
+```
+https://gcc-war-losses-dashboard-production.up.railway.app
+```
+
+Health check: [`/health`](https://gcc-war-losses-dashboard-production.up.railway.app/health)
+
+Railway environment variables required:
+```
+EIA_API_KEY=<your_eia_key>
+```
+
+### Frontend — Vercel (recommended)
+
+To deploy the frontend, connect the GitHub repo to Vercel and set:
+```
+VITE_API_BASE_URL=https://gcc-war-losses-dashboard-production.up.railway.app
+```
+
+Vercel will automatically build with `.env.production` on every push to `main`.
 
 ---
 
