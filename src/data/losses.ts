@@ -1,4 +1,4 @@
-import { LossEvent, CountrySummary, CategoryMeta, TickerItem, Country, Category } from '../types'
+import type { LossEvent, CountrySummary, CategoryMeta, TickerItem, Country, Category } from '../types'
 
 // ─── Category Metadata ───────────────────────────────────────────────────────
 

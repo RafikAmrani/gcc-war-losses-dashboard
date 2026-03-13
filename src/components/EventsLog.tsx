@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { LOSS_EVENTS, CATEGORY_META, COUNTRY_FLAGS } from '../data/losses'
-import { Country, Category } from '../types'
+import type { Country, Category } from '../types'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 const COUNTRIES: Country[] = ['UAE', 'Saudi Arabia', 'Kuwait', 'Qatar', 'Bahrain', 'Oman']

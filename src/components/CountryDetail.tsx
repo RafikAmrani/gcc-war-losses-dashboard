@@ -1,4 +1,4 @@
-import { CountrySummary, Category } from '../types'
+import type { CountrySummary, Category } from '../types'
 import { CATEGORY_META, LOSS_EVENTS } from '../data/losses'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -100,7 +100,7 @@ export default function CountryDetail({ summary }: Props) {
               />
               <Tooltip
                 contentStyle={{ background: '#111', border: '1px solid #1e1e1e', fontFamily: 'monospace', fontSize: 11 }}
-                formatter={(v: number) => [fmt(v)]}
+                formatter={(v) => [fmt(Number(v))]}
               />
             </RadarChart>
           </ResponsiveContainer>

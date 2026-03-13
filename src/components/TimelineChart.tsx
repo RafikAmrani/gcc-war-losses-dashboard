@@ -66,7 +66,7 @@ export default function TimelineChart() {
               padding: '8px 12px',
             }}
             labelStyle={{ color: '#f97316', marginBottom: 4, fontWeight: 'bold' }}
-            formatter={(v: number, name: string) => [fmt(v), name]}
+            formatter={(v, name) => [fmt(Number(v)), String(name)]}
           />
           <Legend
             formatter={(v) => <span style={{ color: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}>{v}</span>}

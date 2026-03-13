@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, Cell, PieChart, Pie, Legend
 } from 'recharts'
 import { COUNTRY_SUMMARIES, CATEGORY_META } from '../data/losses'
-import { Category } from '../types'
+import type { Category } from '../types'
 
 function fmt(n: number) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
@@ -71,7 +71,7 @@ export default function CategoryBreakdown() {
               <Tooltip
                 contentStyle={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 0, fontFamily: 'monospace', fontSize: 11 }}
                 labelStyle={{ color: '#e5e7eb' }}
-                formatter={(v: number, name: string) => [fmt(v), CATEGORY_META[name as Category]?.label || name]}
+                formatter={(v, name) => [fmt(Number(v)), CATEGORY_META[name as Category]?.label || String(name)]}
               />
               {CATEGORIES.map(cat => (
                 <Bar key={cat} dataKey={cat} stackId="a" fill={CATEGORY_META[cat].color} radius={0} />
@@ -106,7 +106,7 @@ export default function CategoryBreakdown() {
               />
               <Tooltip
                 contentStyle={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 0, fontFamily: 'monospace', fontSize: 11 }}
-                formatter={(v: number) => [fmt(v)]}
+                formatter={(v) => [fmt(Number(v))]}
               />
             </PieChart>
           </ResponsiveContainer>

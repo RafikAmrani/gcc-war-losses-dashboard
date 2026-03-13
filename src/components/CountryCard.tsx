@@ -1,4 +1,4 @@
-import { CountrySummary } from '../types'
+import type { CountrySummary } from '../types'
 import { CATEGORY_META } from '../data/losses'
 import { TrendingUp } from 'lucide-react'
 
