@@ -162,6 +162,7 @@ def compute_losses(oil: dict, news_events: list[dict]) -> dict:
             "flag": COUNTRY_FLAGS[country],
             "totalLoss": total,
             "byCategory": by_cat,
+            "calcBreakdown": _build_breakdown(country, days, oil),
             "trend": "up",
             "lastUpdated": today_str,
         })
@@ -292,3 +293,282 @@ def _interceptor_estimate(country: str, days: int) -> float:
         return rate * 20 * 3 + rate * 5 * (days - 3)
     else:
         return rate * 20 * 3 + rate * 5 * 7 + rate * 1 * (days - 10)
+
+
+_INTERCEPTOR_BASE_RATES = {
+    "Saudi Arabia": 3.5,
+    "UAE": 2.5,
+    "Kuwait": 1.5,
+    "Qatar": 2.0,
+    "Bahrain": 1.0,
+    "Oman": 0.5,
+}
+
+
+def _build_breakdown(country: str, days: int, oil: dict) -> dict:
+    """
+    Return a per-category dict of { formula, inputs, steps, result }
+    so the frontend can show exactly how each loss figure was derived.
+    """
+    oil_price    = float(oil.get("price",    74.5))
+    oil_baseline = float(oil.get("baseline", 78.0))
+    price_drop   = max(0.0, oil_baseline - oil_price)
+
+    daily_exp    = OIL_EXPORTS_MBD[country]
+    airport_rev  = AIRPORT_DAILY_REV_M[country]
+    airline_rev  = AIRLINE_DAILY_REV_M[country]
+    mktcap_b     = MARKET_CAPS_B[country]
+    fdi_annual   = FDI_ANNUAL_B[country]
+    re_annual    = REAL_ESTATE_ANNUAL_B[country]
+
+    # Phase day counts
+    d0 = min(days, 3)               # days 0-2 (full disruption)
+    d1 = max(0, min(days - 3, 5))  # days 3-7
+    d2 = max(0, days - 8)           # day 8+
+
+    bd: dict = {}
+
+    # ── Oil revenue ──────────────────────────────────────────────────────────
+    vol_d0 = daily_exp * 1.00 * d0
+    vol_d1 = daily_exp * 0.60 * d1
+    vol_d2 = daily_exp * 0.40 * d2
+    rem_d0 = daily_exp * 0.00 * d0
+    rem_d1 = daily_exp * 0.40 * d1
+    rem_d2 = daily_exp * 0.60 * d2
+    oil_vol_loss   = (vol_d0 + vol_d1 + vol_d2) * oil_baseline
+    oil_price_loss = (rem_d0 + rem_d1 + rem_d2) * price_drop
+    oil_total = round(oil_vol_loss + oil_price_loss, 1)
+    bd["oil_revenue"] = {
+        "formula": "Σ(disrupted_volume × baseline_price) + Σ(remaining_volume × price_drop)",
+        "inputs": {
+            "Daily exports":       f"{daily_exp}M bbl/day",
+            "Conflict days":       str(days),
+            "Brent baseline":      f"${oil_baseline:.2f}/bbl",
+            "Current Brent":       f"${oil_price:.2f}/bbl",
+            "Price drop":          f"${price_drop:.2f}/bbl",
+            "Phase 1 (days 0–2)":  "100% disrupted",
+            "Phase 2 (days 3–7)":  "60% disrupted",
+            "Phase 3 (day 8+)":    "40% disrupted",
+        },
+        "steps": [
+            {"label": f"Phase 1: {d0}d × {daily_exp}M bbl × 100% lost × ${oil_baseline:.2f}/bbl",
+             "value": f"${vol_d0 * oil_baseline:,.1f}M"},
+            {"label": f"Phase 2: {d1}d × {daily_exp}M bbl × 60% lost × ${oil_baseline:.2f}/bbl",
+             "value": f"${vol_d1 * oil_baseline:,.1f}M"},
+            {"label": f"Phase 3: {d2}d × {daily_exp}M bbl × 40% lost × ${oil_baseline:.2f}/bbl",
+             "value": f"${vol_d2 * oil_baseline:,.1f}M"},
+            {"label": f"Price loss on remaining exports × ${price_drop:.2f}/bbl drop",
+             "value": f"${oil_price_loss:,.1f}M"},
+        ],
+        "result": oil_total,
+    }
+
+    # ── Airports ─────────────────────────────────────────────────────────────
+    ap_d0 = airport_rev * 1.00 * d0
+    ap_d1 = airport_rev * 0.50 * d1
+    ap_d2 = airport_rev * 0.15 * d2
+    ap_total = round(ap_d0 + ap_d1 + ap_d2, 1)
+    bd["airports"] = {
+        "formula": "Σ(daily_revenue × phase_closure_rate × days_in_phase)",
+        "inputs": {
+            "Daily airport revenue": f"${airport_rev}M",
+            "Source":                "IATA 2024 combined hub revenue",
+            "Phase 1 (days 0–2)":    "100% closure",
+            "Phase 2 (days 3–7)":    "50% closure",
+            "Phase 3 (day 8+)":      "15% residual disruption",
+        },
+        "steps": [
+            {"label": f"Phase 1: {d0}d × ${airport_rev}M × 100%", "value": f"${ap_d0:,.1f}M"},
+            {"label": f"Phase 2: {d1}d × ${airport_rev}M × 50%",  "value": f"${ap_d1:,.1f}M"},
+            {"label": f"Phase 3: {d2}d × ${airport_rev}M × 15%",  "value": f"${ap_d2:,.1f}M"},
+        ],
+        "result": ap_total,
+    }
+
+    # ── Airlines ─────────────────────────────────────────────────────────────
+    al_d0 = airline_rev * 1.00 * d0
+    al_d1 = airline_rev * 0.60 * d1
+    al_d2 = airline_rev * 0.20 * d2
+    al_total = round(al_d0 + al_d1 + al_d2, 1)
+    bd["airlines"] = {
+        "formula": "Σ(daily_revenue × phase_suspension_rate × days_in_phase)",
+        "inputs": {
+            "Daily airline revenue": f"${airline_rev}M",
+            "Source":                "IATA / carrier financials 2024",
+            "Phase 1 (days 0–2)":    "100% suspended",
+            "Phase 2 (days 3–7)":    "60% suspended",
+            "Phase 3 (day 8+)":      "20% reduced",
+        },
+        "steps": [
+            {"label": f"Phase 1: {d0}d × ${airline_rev}M × 100%", "value": f"${al_d0:,.1f}M"},
+            {"label": f"Phase 2: {d1}d × ${airline_rev}M × 60%",  "value": f"${al_d1:,.1f}M"},
+            {"label": f"Phase 3: {d2}d × ${airline_rev}M × 20%",  "value": f"${al_d2:,.1f}M"},
+        ],
+        "result": al_total,
+    }
+
+    # ── Trade (Hormuz rerouting surcharge) ────────────────────────────────────
+    tr_d0 = daily_exp * 3.0 * 1.00 * d0
+    tr_d1 = daily_exp * 3.0 * 0.60 * d1
+    tr_d2 = daily_exp * 3.0 * 0.40 * d2
+    tr_total = round(tr_d0 + tr_d1 + tr_d2, 1)
+    bd["trade"] = {
+        "formula": "Σ(exports_mbbl × $3/bbl_detour_cost × disruption_factor × days)",
+        "inputs": {
+            "Daily exports":           f"{daily_exp}M bbl/day",
+            "Hormuz detour surcharge":  "$3.00/bbl (Cape of Good Hope rerouting)",
+            "Phase 1 disruption":       "100%",
+            "Phase 2 disruption":       "60%",
+            "Phase 3 disruption":       "40%",
+        },
+        "steps": [
+            {"label": f"Phase 1: {d0}d × {daily_exp}M bbl × $3/bbl × 100%", "value": f"${tr_d0:,.1f}M"},
+            {"label": f"Phase 2: {d1}d × {daily_exp}M bbl × $3/bbl × 60%",  "value": f"${tr_d1:,.1f}M"},
+            {"label": f"Phase 3: {d2}d × {daily_exp}M bbl × $3/bbl × 40%",  "value": f"${tr_d2:,.1f}M"},
+        ],
+        "result": tr_total,
+    }
+
+    # ── Insurance (war-risk premium surcharge) ────────────────────────────────
+    # transported = volume still moving = exports × (1 - disruption)
+    ins_d0 = daily_exp * 0.00 * (0.20 * 7) * d0   # 0% transported at full blockade
+    ins_d1 = daily_exp * 0.40 * (0.20 * 7) * d1
+    ins_d2 = daily_exp * 0.60 * (0.20 * 7) * d2
+    ins_total = round(ins_d0 + ins_d1 + ins_d2, 1)
+    bd["insurance"] = {
+        "formula": "Σ(transported_volume × 7× war-risk surcharge × $0.20/bbl base)",
+        "inputs": {
+            "Daily exports":          f"{daily_exp}M bbl/day",
+            "Base war-risk premium":  "$0.20/bbl (Lloyd's pre-conflict rate)",
+            "Surcharge multiplier":   "8× total (7× extra vs baseline)",
+            "Phase 1":                "0% transported (Hormuz fully blocked)",
+            "Phase 2":                "40% transported",
+            "Phase 3":                "60% transported",
+        },
+        "steps": [
+            {"label": f"Phase 1: {d0}d × {daily_exp}M bbl × 0% transported × $1.40/bbl surcharge",
+             "value": f"${ins_d0:,.1f}M"},
+            {"label": f"Phase 2: {d1}d × {daily_exp}M bbl × 40% transported × $1.40/bbl",
+             "value": f"${ins_d1:,.1f}M"},
+            {"label": f"Phase 3: {d2}d × {daily_exp}M bbl × 60% transported × $1.40/bbl",
+             "value": f"${ins_d2:,.1f}M"},
+        ],
+        "result": ins_total,
+    }
+
+    # ── Tourism ───────────────────────────────────────────────────────────────
+    tourism_daily = airport_rev * 0.30
+    tourism_total = round(tourism_daily * 0.70 * days, 1)
+    bd["tourism"] = {
+        "formula": "airport_daily_rev × 30%_tourism_share × 70%_demand_collapse × conflict_days",
+        "inputs": {
+            "Airport daily revenue":    f"${airport_rev}M",
+            "Tourism revenue share":    "30% of airport throughput",
+            "Demand collapse rate":     "70% (travel bans + perception risk)",
+            "Conflict days":            str(days),
+        },
+        "steps": [
+            {"label": f"Daily tourism baseline: ${airport_rev}M × 30%",
+             "value": f"${tourism_daily:,.2f}M/day"},
+            {"label": "× 70% demand collapse",
+             "value": f"${tourism_daily * 0.70:,.2f}M/day"},
+            {"label": f"× {days} conflict days",
+             "value": f"${tourism_total:,.1f}M"},
+        ],
+        "result": tourism_total,
+    }
+
+    # ── Equity (free-float adjusted) ─────────────────────────────────────────
+    mktcap_m   = mktcap_b * 1_000
+    total_drop = 0.010 + 0.0001 * days   # as decimal
+    eq_total   = round(mktcap_m * 0.20 * total_drop, 1)
+    bd["equity"] = {
+        "formula": "market_cap × 20%_free_float × (1.0%_shock + 0.01%/day × days)",
+        "inputs": {
+            "Total market capitalisation": f"${mktcap_b:.0f}B",
+            "Source":                       "Exchange data end-2024 (Tadawul/DFM/QSE/KSE/BSE/MSM)",
+            "Free-float estimate":          "20% (remainder is state/anchor-held)",
+            "Initial shock":               "1.0% (conflict announcement)",
+            "Daily erosion":               "0.01%/day (sustained risk premium)",
+            "Total effective drop":        f"{total_drop * 100:.2f}%",
+        },
+        "steps": [
+            {"label": f"Total market cap: ${mktcap_b:.0f}B",
+             "value": f"${mktcap_m:,.0f}M"},
+            {"label": "× 20% free-float (state & sovereign wealth excluded)",
+             "value": f"${mktcap_m * 0.20:,.0f}M"},
+            {"label": f"× {total_drop * 100:.2f}% total drop (1.0% shock + 0.01%/day × {days}d)",
+             "value": f"${eq_total:,.1f}M"},
+        ],
+        "result": eq_total,
+    }
+
+    # ── FDI ───────────────────────────────────────────────────────────────────
+    fdi_total = round(fdi_annual * 1_000 * 0.50 * (3 / 12), 1)
+    bd["fdi"] = {
+        "formula": "annual_FDI × 50%_freeze × 3/12_months",
+        "inputs": {
+            "Annual FDI inflow":    f"${fdi_annual}B",
+            "Source":               "World Bank 2024 estimates",
+            "Capital freeze rate":  "50% (war-risk premium halts H1 2026 pipeline)",
+            "Forward horizon":      "3 months",
+        },
+        "steps": [
+            {"label": f"Annual FDI: ${fdi_annual}B",
+             "value": f"${fdi_annual * 1000:,.0f}M"},
+            {"label": "× 50% war-risk freeze rate",
+             "value": f"${fdi_annual * 1000 * 0.50:,.0f}M"},
+            {"label": "× 3/12 months forward horizon",
+             "value": f"${fdi_total:,.1f}M"},
+        ],
+        "result": fdi_total,
+    }
+
+    # ── Real Estate ───────────────────────────────────────────────────────────
+    re_total = round(re_annual * 1_000 * 0.20 * (3 / 12), 1)
+    bd["real_estate"] = {
+        "formula": "annual_RE_volume × 20%_transaction_slowdown × 3/12_months",
+        "inputs": {
+            "Annual RE transaction volume":  f"${re_annual}B",
+            "Source":                        "National real estate authority data 2024",
+            "Transaction slowdown":          "20% (buyer flight-to-safety)",
+            "Horizon":                       "3 months",
+        },
+        "steps": [
+            {"label": f"Annual RE volume: ${re_annual}B",
+             "value": f"${re_annual * 1000:,.0f}M"},
+            {"label": "× 20% transaction slowdown",
+             "value": f"${re_annual * 1000 * 0.20:,.0f}M"},
+            {"label": "× 3/12 months",
+             "value": f"${re_total:,.1f}M"},
+        ],
+        "result": re_total,
+    }
+
+    # ── Interceptors ─────────────────────────────────────────────────────────
+    int_rate   = _INTERCEPTOR_BASE_RATES.get(country, 1.0)
+    int_total  = round(_interceptor_estimate(country, days), 1)
+    int_peak   = round(int_rate * 20 * min(days, 3), 1)
+    int_active = round(int_rate * 5  * max(0, min(days - 3, 7)), 1)
+    int_supp   = round(int_rate * 1  * max(0, days - 10), 1)
+    bd["interceptors"] = {
+        "formula": "base_rate × intercepts/day × days  (phased: peak/active/suppressed)",
+        "inputs": {
+            "Exposure factor":         f"×{int_rate} relative to Oman (1.0 baseline)",
+            "PAC-3 unit cost":         "~$4M/missile (Raytheon list price)",
+            "Peak phase (days 0–3)":   "20 intercepts/day",
+            "Active phase (days 4–10)":"5 intercepts/day",
+            "Suppressed (day 11+)":    "1 intercept/day",
+        },
+        "steps": [
+            {"label": f"Peak: {min(days,3)}d × {int_rate} rate × 20 intercepts × $4M",
+             "value": f"${int_peak:,.1f}M"},
+            {"label": f"Active: {max(0,min(days-3,7))}d × {int_rate} rate × 5 intercepts × $4M",
+             "value": f"${int_active:,.1f}M"},
+            {"label": f"Suppressed: {max(0,days-10)}d × {int_rate} rate × 1 intercept × $4M",
+             "value": f"${int_supp:,.1f}M"},
+        ],
+        "result": int_total,
+    }
+
+    return bd

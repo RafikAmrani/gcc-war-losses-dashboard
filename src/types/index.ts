@@ -23,11 +23,24 @@ export interface LossEvent {
   confidence: 'confirmed' | 'estimated' | 'projected'
 }
 
+export interface CalcStep {
+  label: string
+  value: string
+}
+
+export interface CalcBreakdown {
+  formula: string
+  inputs: Record<string, string>
+  steps: CalcStep[]
+  result: number
+}
+
 export interface CountrySummary {
   country: Country
   flag: string
   totalLoss: number      // USD millions
   byCategory: Record<Category, number>
+  calcBreakdown?: Record<Category, CalcBreakdown>
   trend: 'up' | 'down' | 'stable'
   lastUpdated: string
 }
