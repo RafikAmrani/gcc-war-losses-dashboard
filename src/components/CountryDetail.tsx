@@ -15,7 +15,7 @@ function fmt(n: number) {
   return `$${n}M`
 }
 
-const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'other']
+const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'equity', 'fdi', 'real_estate']
 
 export default function CountryDetail({ summary }: Props) {
   const { events, loading } = useEvents(summary.country)
