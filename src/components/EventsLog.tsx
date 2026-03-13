@@ -3,14 +3,12 @@ import { CATEGORY_META, COUNTRY_FLAGS } from '../data/losses'
 import type { Country, Category } from '../types'
 import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import { useEvents } from '../hooks/useEvents'
+import { formatMillions } from '../utils/formatters'
 
 const COUNTRIES: Country[] = ['UAE', 'Saudi Arabia', 'Kuwait', 'Qatar', 'Bahrain', 'Oman']
 const CATEGORIES: Category[] = ['interceptors', 'oil_revenue', 'airports', 'airlines', 'trade', 'tourism', 'insurance', 'other']
 
-function fmt(n: number) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(2)}B`
-  return `$${n}M`
-}
+const fmt = formatMillions
 
 const CONFIDENCE_COLOR = {
   confirmed: '#22c55e',

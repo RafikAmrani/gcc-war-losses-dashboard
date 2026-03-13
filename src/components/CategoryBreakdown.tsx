@@ -4,16 +4,14 @@ import {
 } from 'recharts'
 import { CATEGORY_META } from '../data/losses'
 import type { CountrySummary, Category } from '../types'
+import { formatMillions } from '../utils/formatters'
 
 interface Props {
   summaries: CountrySummary[]
   loading: boolean
 }
 
-function fmt(n: number) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
-  return `$${n}M`
-}
+const fmt = formatMillions
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-bloomberg-surface rounded ${className ?? ''}`} />

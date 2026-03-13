@@ -156,16 +156,20 @@ def _gdelt_date(raw: str) -> str:
 
 
 def _map_to_events(articles: list[dict]) -> list[dict]:
-    """Map news articles to structured loss events."""
+    """Map news articles to structured loss events.
+
+    Each article can fan out to multiple countries if it mentions several, or
+    to all GCC countries when it is generic Gulf/Hormuz coverage.
+    """
     seen_hashes: set[str] = set()
     events: list[dict] = []
 
     for art in articles:
         text = ((art.get("title") or "") + " " + (art.get("description") or "")).lower()
 
-        country = _detect_country(text)
+        countries = _detect_countries(text)
         category = _detect_category(text)
-        if not country or not category:
+        if not countries or not category:
             continue
 
         # Deduplicate by title hash
@@ -175,34 +179,44 @@ def _map_to_events(articles: list[dict]) -> list[dict]:
         seen_hashes.add(title_hash)
 
         lo, hi = CATEGORY_AMOUNTS[category]
-        # Deterministic amount from hash so re-fetches are stable
-        amount = round(lo + (int(title_hash[:8], 16) % 1000) / 1000 * (hi - lo), 1)
+        # Deterministic base amount from hash so re-fetches are stable
+        base_amount = round(lo + (int(title_hash[:8], 16) % 1000) / 1000 * (hi - lo), 1)
+        # Split amount proportionally across all affected countries
+        per_country_amount = round(base_amount / len(countries), 1)
 
-        events.append({
-            "id": f"evt_{title_hash[:8]}",
-            "date": art.get("date") or str(CONFLICT_START),
-            "country": country,
-            "category": category,
-            "description": (art.get("description") or art.get("title") or "")[:200],
-            "amount": amount,
-            "confidence": "confirmed" if category in ("interceptors", "oil_revenue") else "estimated",
-            "source": art.get("source", ""),
-            "url": art.get("url", ""),
-        })
+        description = (art.get("description") or art.get("title") or "")[:200]
+        date = art.get("date") or str(CONFLICT_START)
+        confidence = "confirmed" if category in ("interceptors", "oil_revenue") else "estimated"
+
+        for idx, country in enumerate(countries):
+            events.append({
+                "id": f"evt_{title_hash[:8]}_{idx}",
+                "date": date,
+                "country": country,
+                "category": category,
+                "description": description,
+                "amount": per_country_amount,
+                "confidence": confidence,
+                "source": art.get("source", ""),
+                "url": art.get("url", ""),
+            })
 
     # Sort newest first
     events.sort(key=lambda e: e["date"], reverse=True)
     return events
 
 
-def _detect_country(text: str) -> str | None:
-    for country, keywords in COUNTRY_KEYWORDS.items():
-        if any(kw in text for kw in keywords):
-            return country
-    # Default to Saudi Arabia for generic Gulf coverage
+ALL_GCC = list(COUNTRY_KEYWORDS.keys())  # ['Saudi Arabia', 'UAE', 'Qatar', 'Kuwait', 'Bahrain', 'Oman']
+
+def _detect_countries(text: str) -> list[str]:
+    """Return all GCC countries explicitly mentioned, or all six for generic Gulf coverage."""
+    matched = [c for c, kws in COUNTRY_KEYWORDS.items() if any(kw in text for kw in kws)]
+    if matched:
+        return matched
+    # Generic Gulf/Hormuz article affects all GCC countries
     if any(kw in text for kw in ["gulf", "gcc", "hormuz", "persian gulf"]):
-        return "Saudi Arabia"
-    return None
+        return ALL_GCC
+    return []
 
 
 def _detect_category(text: str) -> str | None:
