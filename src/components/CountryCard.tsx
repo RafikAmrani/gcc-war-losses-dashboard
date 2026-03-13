@@ -34,19 +34,19 @@ export default function CountryCard({ summary, rank, onClick, active }: Props) {
       {/* Header row */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-[22px]">{summary.flag}</span>
+          <span className="text-[26px]">{summary.flag}</span>
           <div>
-            <div className="text-white font-semibold text-[14px] leading-none">{summary.country}</div>
-            <div className="text-bloomberg-muted text-[11px] font-mono mt-0.5">Rank #{rank}</div>
+            <div className="text-white font-semibold text-[16px] leading-none">{summary.country}</div>
+            <div className="text-bloomberg-muted text-[13px] font-mono mt-0.5">Rank #{rank}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-white font-bold font-mono text-[18px] leading-none">
+          <div className="text-white font-bold font-mono text-[20px] leading-none">
             {fmt(summary.totalLoss)}
           </div>
           <div className="flex items-center justify-end gap-1 mt-1">
-            <TrendingUp size={11} className="text-bloomberg-red" />
-            <span className="text-bloomberg-red text-[11px] font-mono">+{(Math.random() * 5 + 1).toFixed(1)}%</span>
+            <TrendingUp size={13} className="text-bloomberg-red" />
+            <span className="text-bloomberg-red text-[13px] font-mono">+{(Math.random() * 5 + 1).toFixed(1)}%</span>
           </div>
         </div>
       </div>
@@ -59,8 +59,8 @@ export default function CountryCard({ summary, rank, onClick, active }: Props) {
           return (
             <div key={cat}>
               <div className="flex justify-between items-center mb-0.5">
-                <span className="text-bloomberg-dim text-[10px] font-mono">{meta.icon} {meta.label}</span>
-                <span className="text-bloomberg-dim text-[10px] font-mono">{fmt(val)}</span>
+                <span className="text-bloomberg-dim text-[12px] font-mono">{meta.icon} {meta.label}</span>
+                <span className="text-bloomberg-dim text-[12px] font-mono">{fmt(val)}</span>
               </div>
               <div className="h-0.5 bg-bloomberg-border rounded-full overflow-hidden">
                 <div
@@ -75,10 +75,10 @@ export default function CountryCard({ summary, rank, onClick, active }: Props) {
 
       {/* Confidence badge */}
       <div className="flex justify-between items-center mt-3">
-        <span className="text-bloomberg-muted text-[10px] font-mono uppercase tracking-widest">
+        <span className="text-bloomberg-muted text-[12px] font-mono uppercase tracking-widest">
           Updated {summary.lastUpdated}
         </span>
-        <span className="px-1.5 py-0.5 text-[9px] font-mono bg-bloomberg-border text-bloomberg-dim uppercase tracking-wider">
+        <span className="px-1.5 py-0.5 text-[11px] font-mono bg-bloomberg-border text-bloomberg-dim uppercase tracking-wider">
           EST
         </span>
       </div>

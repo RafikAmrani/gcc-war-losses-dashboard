@@ -47,9 +47,9 @@ export default function EventsLog() {
       {/* Filter bar */}
       <div className="flex flex-wrap gap-px border-b border-bloomberg-border bg-bloomberg-border">
         <div className="bg-bloomberg-panel px-4 py-2 flex items-center gap-2">
-          <span className="text-bloomberg-dim text-[10px] font-mono uppercase tracking-widest">Country</span>
+          <span className="text-bloomberg-dim text-[12px] font-mono uppercase tracking-widest">Country</span>
           <select
-            className="bg-transparent text-white text-[11px] font-mono outline-none cursor-pointer"
+            className="bg-transparent text-white text-[13px] font-mono outline-none cursor-pointer"
             value={filterCountry}
             onChange={e => setFilterCountry(e.target.value as Country | 'ALL')}
           >
@@ -60,9 +60,9 @@ export default function EventsLog() {
           </select>
         </div>
         <div className="bg-bloomberg-panel px-4 py-2 flex items-center gap-2">
-          <span className="text-bloomberg-dim text-[10px] font-mono uppercase tracking-widest">Category</span>
+          <span className="text-bloomberg-dim text-[12px] font-mono uppercase tracking-widest">Category</span>
           <select
-            className="bg-transparent text-white text-[11px] font-mono outline-none cursor-pointer"
+            className="bg-transparent text-white text-[13px] font-mono outline-none cursor-pointer"
             value={filterCategory}
             onChange={e => setFilterCategory(e.target.value as Category | 'ALL')}
           >
@@ -73,13 +73,13 @@ export default function EventsLog() {
           </select>
         </div>
         <div className="ml-auto bg-bloomberg-panel px-4 py-2">
-          <span className="text-bloomberg-dim text-[11px] font-mono">{filtered.length} events · {fmt(filtered.reduce((s, e) => s + e.amount, 0))} total</span>
+          <span className="text-bloomberg-dim text-[13px] font-mono">{filtered.length} events · {fmt(filtered.reduce((s, e) => s + e.amount, 0))} total</span>
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-[12px] font-mono min-w-[800px]">
+        <table className="w-full text-[14px] font-mono min-w-[800px]">
           <thead>
             <tr className="border-b border-bloomberg-border">
               {[
@@ -93,7 +93,7 @@ export default function EventsLog() {
               ].map(h => (
                 <th
                   key={h.label}
-                  className={`text-left text-bloomberg-dim px-4 py-2.5 font-normal text-[10px] uppercase tracking-widest ${h.field ? 'cursor-pointer hover:text-white' : ''}`}
+                  className={`text-left text-bloomberg-dim px-4 py-2.5 font-normal text-[12px] uppercase tracking-widest ${h.field ? 'cursor-pointer hover:text-white' : ''}`}
                   onClick={() => h.field && toggleSort(h.field)}
                 >
                   {h.label} {h.field && <SortIcon field={h.field} />}
@@ -115,7 +115,7 @@ export default function EventsLog() {
                     <span className="text-white">{e.country}</span>
                   </td>
                   <td className="px-4 py-2.5">
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border text-[10px]"
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border text-[12px]"
                       style={{ borderColor: meta.color + '40', color: meta.color }}>
                       {meta.icon} {meta.label}
                     </span>
@@ -126,13 +126,13 @@ export default function EventsLog() {
                   <td className="px-4 py-2.5 text-white font-bold">{fmt(e.amount)}</td>
                   <td className="px-4 py-2.5">
                     <span
-                      className="text-[10px] uppercase tracking-wider"
+                      className="text-[12px] uppercase tracking-wider"
                       style={{ color: CONFIDENCE_COLOR[e.confidence] }}
                     >
                       ● {e.confidence}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-bloomberg-muted text-[10px] max-w-[120px] truncate">
+                  <td className="px-4 py-2.5 text-bloomberg-muted text-[12px] max-w-[120px] truncate">
                     {e.source}
                   </td>
                 </tr>

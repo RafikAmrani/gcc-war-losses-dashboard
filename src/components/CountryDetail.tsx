@@ -31,22 +31,22 @@ export default function CountryDetail({ summary }: Props) {
       {/* Country header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-bloomberg-border">
         <div className="flex items-center gap-3">
-          <span className="text-[36px]">{summary.flag}</span>
+          <span className="text-[40px]">{summary.flag}</span>
           <div>
-            <h2 className="text-white text-[20px] font-bold leading-none">{summary.country}</h2>
-            <p className="text-bloomberg-dim text-[12px] font-mono mt-1">US–Iran War Economic Damage Report</p>
+            <h2 className="text-white text-[24px] font-bold leading-none">{summary.country}</h2>
+            <p className="text-bloomberg-dim text-[14px] font-mono mt-1">US–Iran War Economic Damage Report</p>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-bloomberg-orange text-[10px] font-mono uppercase tracking-widest">Total Loss</div>
-          <div className="text-white text-[28px] font-bold font-mono">{fmt(summary.totalLoss)}</div>
+          <div className="text-bloomberg-orange text-[12px] font-mono uppercase tracking-widest">Total Loss</div>
+          <div className="text-white text-[32px] font-bold font-mono">{fmt(summary.totalLoss)}</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
         {/* Category breakdown bars */}
         <div className="p-6 border-r border-bloomberg-border">
-          <div className="text-bloomberg-orange text-[11px] font-mono uppercase tracking-widest mb-4">
+          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-4">
             Loss by Category
           </div>
           <div className="space-y-3">
@@ -58,12 +58,12 @@ export default function CountryDetail({ summary }: Props) {
               return (
                 <div key={cat}>
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-bloomberg-text text-[12px] font-mono">
+                    <span className="text-bloomberg-text text-[14px] font-mono">
                       {meta.icon} {meta.label}
                     </span>
                     <div className="flex items-center gap-3">
-                      <span className="text-bloomberg-dim text-[11px] font-mono">{pct.toFixed(1)}%</span>
-                      <span className="text-white font-bold font-mono text-[13px] w-20 text-right">{fmt(val)}</span>
+                      <span className="text-bloomberg-dim text-[13px] font-mono">{pct.toFixed(1)}%</span>
+                      <span className="text-white font-bold font-mono text-[15px] w-20 text-right">{fmt(val)}</span>
                     </div>
                   </div>
                   <div className="h-1.5 bg-bloomberg-border rounded-full overflow-hidden">
@@ -80,7 +80,7 @@ export default function CountryDetail({ summary }: Props) {
 
         {/* Radar chart */}
         <div className="p-6">
-          <div className="text-bloomberg-orange text-[11px] font-mono uppercase tracking-widest mb-2">
+          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-2">
             Exposure Profile
           </div>
           <ResponsiveContainer width="100%" height={240}>
@@ -88,7 +88,7 @@ export default function CountryDetail({ summary }: Props) {
               <PolarGrid stroke="#1e1e1e" />
               <PolarAngleAxis
                 dataKey="subject"
-                tick={{ fill: '#9ca3af', fontSize: 10, fontFamily: 'monospace' }}
+                tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}
               />
               <Radar
                 name={summary.country}
@@ -110,16 +110,16 @@ export default function CountryDetail({ summary }: Props) {
       {/* Events for this country */}
       <div className="border-t border-bloomberg-border">
         <div className="px-6 py-3 border-b border-bloomberg-border">
-          <span className="text-bloomberg-orange text-[11px] font-mono uppercase tracking-widest">
+          <span className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest">
             Loss Events ({events.length})
           </span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-[11px] font-mono">
+          <table className="w-full text-[13px] font-mono">
             <thead>
               <tr className="border-b border-bloomberg-border">
                 {['DATE', 'CATEGORY', 'DESCRIPTION', 'LOSS', 'SOURCE'].map(h => (
-                  <th key={h} className="text-left text-bloomberg-dim px-4 py-2 font-normal text-[10px] uppercase tracking-widest">{h}</th>
+                  <th key={h} className="text-left text-bloomberg-dim px-4 py-2 font-normal text-[12px] uppercase tracking-widest">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -134,7 +134,7 @@ export default function CountryDetail({ summary }: Props) {
                     </td>
                     <td className="px-4 py-2.5 text-bloomberg-dim max-w-xs">{e.description}</td>
                     <td className="px-4 py-2.5 text-white font-bold">{fmt(e.amount)}</td>
-                    <td className="px-4 py-2.5 text-bloomberg-muted text-[10px]">{e.source}</td>
+                    <td className="px-4 py-2.5 text-bloomberg-muted text-[12px]">{e.source}</td>
                   </tr>
                 )
               })}

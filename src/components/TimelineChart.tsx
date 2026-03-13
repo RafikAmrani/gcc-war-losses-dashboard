@@ -46,12 +46,12 @@ export default function TimelineChart() {
           <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fill: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}
+            tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}
             axisLine={{ stroke: '#1e1e1e' }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}
+            tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${(v / 1000).toFixed(0)}B`}
@@ -62,14 +62,14 @@ export default function TimelineChart() {
               border: '1px solid #1e1e1e',
               borderRadius: 0,
               fontFamily: 'monospace',
-              fontSize: 11,
+              fontSize: 13,
               padding: '8px 12px',
             }}
             labelStyle={{ color: '#f97316', marginBottom: 4, fontWeight: 'bold' }}
             formatter={(v, name) => [fmt(Number(v)), String(name)]}
           />
           <Legend
-            formatter={(v) => <span style={{ color: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}>{v}</span>}
+            formatter={(v) => <span style={{ color: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}>{v}</span>}
           />
           {/* Key event markers */}
           <ReferenceLine x="Apr 15" stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'War Start', fill: '#ef4444', fontSize: 10 }} />

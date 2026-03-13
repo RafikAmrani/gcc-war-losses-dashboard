@@ -38,10 +38,10 @@ export default function CategoryBreakdown() {
         {categoryTotals.slice(0, 4).map(c => (
           <div key={c.category} className="bg-bloomberg-panel p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[18px]">{c.icon}</span>
-              <span className="text-bloomberg-dim text-[11px] font-mono uppercase tracking-wider">{c.label}</span>
+              <span className="text-[22px]">{c.icon}</span>
+              <span className="text-bloomberg-dim text-[13px] font-mono uppercase tracking-wider">{c.label}</span>
             </div>
-            <div className="text-white font-bold font-mono text-[22px]">{fmt(c.total)}</div>
+            <div className="text-white font-bold font-mono text-[24px]">{fmt(c.total)}</div>
             <div className="mt-1 h-0.5 rounded-full" style={{ background: c.color }} />
           </div>
         ))}
@@ -50,7 +50,7 @@ export default function CategoryBreakdown() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Stacked bar by country */}
         <div className="bg-bloomberg-panel border border-bloomberg-border p-4">
-          <div className="text-bloomberg-orange text-[11px] font-mono uppercase tracking-widest mb-4">
+          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-4">
             Losses by Country &amp; Category
           </div>
           <ResponsiveContainer width="100%" height={280}>
@@ -58,18 +58,18 @@ export default function CategoryBreakdown() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" />
               <XAxis
                 dataKey="name"
-                tick={{ fill: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}
+                tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}
                 axisLine={{ stroke: '#1e1e1e' }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}
+                tick={{ fill: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}
                 axisLine={{ stroke: '#1e1e1e' }}
                 tickLine={false}
                 tickFormatter={v => `$${(v / 1000).toFixed(0)}B`}
               />
               <Tooltip
-                contentStyle={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 0, fontFamily: 'monospace', fontSize: 11 }}
+                contentStyle={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 0, fontFamily: 'monospace', fontSize: 13 }}
                 labelStyle={{ color: '#e5e7eb' }}
                 formatter={(v, name) => [fmt(Number(v)), CATEGORY_META[name as Category]?.label || String(name)]}
               />
@@ -82,7 +82,7 @@ export default function CategoryBreakdown() {
 
         {/* Pie chart - category share */}
         <div className="bg-bloomberg-panel border border-bloomberg-border p-4">
-          <div className="text-bloomberg-orange text-[11px] font-mono uppercase tracking-widest mb-4">
+          <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-4">
             Total Loss by Category
           </div>
           <ResponsiveContainer width="100%" height={280}>
@@ -102,10 +102,10 @@ export default function CategoryBreakdown() {
                 ))}
               </Pie>
               <Legend
-                formatter={(v) => <span style={{ color: '#9ca3af', fontSize: 11, fontFamily: 'monospace' }}>{v}</span>}
+                formatter={(v) => <span style={{ color: '#9ca3af', fontSize: 13, fontFamily: 'monospace' }}>{v}</span>}
               />
               <Tooltip
-                contentStyle={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 0, fontFamily: 'monospace', fontSize: 11 }}
+                contentStyle={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 0, fontFamily: 'monospace', fontSize: 13 }}
                 formatter={(v) => [fmt(Number(v))]}
               />
             </PieChart>
@@ -115,11 +115,11 @@ export default function CategoryBreakdown() {
 
       {/* Category table */}
       <div className="bg-bloomberg-panel border border-bloomberg-border">
-        <table className="w-full text-[12px] font-mono">
+        <table className="w-full text-[14px] font-mono">
           <thead>
             <tr className="border-b border-bloomberg-border">
               {['CATEGORY', 'DESCRIPTION', 'GCC TOTAL', 'LARGEST EXPOSURE', '% OF TOTAL'].map(h => (
-                <th key={h} className="text-left text-bloomberg-dim px-4 py-2 font-normal text-[10px] uppercase tracking-widest">
+                <th key={h} className="text-left text-bloomberg-dim px-4 py-2 font-normal text-[12px] uppercase tracking-widest">
                   {h}
                 </th>
               ))}
