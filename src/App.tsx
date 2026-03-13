@@ -40,15 +40,15 @@ export default function App() {
       <header className="bg-black border-b border-bloomberg-border">
         <div className="flex items-center justify-between px-4 py-2 border-b border-bloomberg-border">
           <div className="flex items-center gap-3">
-            <div className="text-bloomberg-orange text-[11px] font-bold tracking-[0.2em] uppercase">
+            <div className="text-bloomberg-orange text-[13px] font-bold tracking-[0.2em] uppercase">
               GCC WAR COST TRACKER
             </div>
             <div className="w-px h-4 bg-bloomberg-border" />
-            <div className="text-bloomberg-dim text-[11px] font-mono">US–IRAN CONFLICT · ECONOMIC IMPACT DASHBOARD</div>
+            <div className="text-bloomberg-dim text-[13px] font-mono">US–IRAN CONFLICT · ECONOMIC IMPACT DASHBOARD</div>
           </div>
-          <div className="flex items-center gap-4 text-[11px] font-mono text-bloomberg-dim">
+          <div className="flex items-center gap-4 text-[13px] font-mono text-bloomberg-dim">
             <span className="flex items-center gap-1">
-              <AlertTriangle size={11} className="text-bloomberg-orange" />
+              <AlertTriangle size={13} className="text-bloomberg-orange" />
               ESTIMATES BASED ON PUBLIC DATA
             </span>
             <span className="text-bloomberg-dim">|</span>
@@ -71,13 +71,13 @@ export default function App() {
               </p>
             </div>
             <div className="text-right">
-              <div className="text-bloomberg-orange text-[10px] font-mono uppercase tracking-widest mb-1">
+              <div className="text-bloomberg-orange text-[12px] font-mono uppercase tracking-widest mb-1">
                 TOTAL ESTIMATED LOSS (6 COUNTRIES)
               </div>
-              <div className="text-[38px] font-bold font-mono text-white leading-none">
+              <div className="text-[42px] font-bold font-mono text-white leading-none">
                 {fmt(TOTAL_LOSS)}
               </div>
-              <div className="text-bloomberg-red text-[12px] font-mono mt-1">▲ LOSSES STILL ACCUMULATING</div>
+              <div className="text-bloomberg-red text-[13px] font-mono mt-1">▲ LOSSES STILL ACCUMULATING</div>
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setSelectedCountry(null) }}
-                className={`px-5 py-2 text-[12px] font-mono tracking-wider border-r border-bloomberg-border transition-colors ${
+                className={`px-5 py-2 text-[14px] font-mono tracking-wider border-r border-bloomberg-border transition-colors ${
                   activeTab === tab.id
                     ? 'text-black bg-bloomberg-orange font-bold'
                     : 'text-bloomberg-dim hover:text-white hover:bg-bloomberg-surface'
@@ -110,9 +110,9 @@ export default function App() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-bloomberg-border">
               {sorted.map((c, i) => (
                 <div key={c.country} className="bg-bloomberg-panel px-4 py-3">
-                  <div className="text-bloomberg-dim text-[10px] font-mono uppercase tracking-wider">{c.flag} {c.country}</div>
-                  <div className="text-white font-bold font-mono text-[18px] mt-1">{fmt(c.totalLoss)}</div>
-                  <div className="text-bloomberg-muted text-[10px] font-mono mt-0.5">Rank #{i + 1}</div>
+                  <div className="text-bloomberg-dim text-[13px] font-mono uppercase tracking-wider">{c.flag} {c.country}</div>
+                  <div className="text-white font-bold font-mono text-[20px] mt-1">{fmt(c.totalLoss)}</div>
+                  <div className="text-bloomberg-muted text-[13px] font-mono mt-0.5">Rank #{i + 1}</div>
                 </div>
               ))}
             </div>
@@ -125,10 +125,10 @@ export default function App() {
                 return (
                   <div key={cat} className="bg-bloomberg-panel p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[16px]">{meta.icon}</span>
-                      <span className="text-bloomberg-dim text-[10px] font-mono uppercase tracking-wider">{meta.label}</span>
+                      <span className="text-[20px]">{meta.icon}</span>
+                      <span className="text-bloomberg-dim text-[13px] font-mono uppercase tracking-wider">{meta.label}</span>
                     </div>
-                    <div className="text-white font-bold font-mono text-[20px]">{fmt(total)}</div>
+                    <div className="text-white font-bold font-mono text-[22px]">{fmt(total)}</div>
                     <div className="mt-2 h-0.5 rounded-full" style={{ background: meta.color }} />
                   </div>
                 )
@@ -190,8 +190,8 @@ export default function App() {
           <div className="space-y-6">
             <TimelineChart />
             <div className="bg-bloomberg-panel border border-bloomberg-border p-4">
-              <div className="text-bloomberg-orange text-[11px] font-mono uppercase tracking-widest mb-3">Key Events</div>
-              <div className="space-y-2 font-mono text-[12px]">
+              <div className="text-bloomberg-orange text-[13px] font-mono uppercase tracking-widest mb-3">Key Events</div>
+              <div className="space-y-2 font-mono text-[14px]">
                 {[
                   { date: 'Apr 15', event: 'US strike on Iranian nuclear facilities — GCC air defenses activated', impact: 'HIGH' },
                   { date: 'Apr 16', event: 'Iran retaliatory missile barrage — Patriot/THAAD intercepts across 5 GCC states', impact: 'CRITICAL' },
@@ -206,7 +206,7 @@ export default function App() {
                   <div key={e.date} className="flex items-start gap-4 py-2 border-b border-bloomberg-border">
                     <span className="text-bloomberg-orange w-14 shrink-0">{e.date}</span>
                     <span className="text-bloomberg-text flex-1">{e.event}</span>
-                    <span className={`shrink-0 text-[10px] px-2 py-0.5 ${
+                    <span className={`shrink-0 text-[12px] px-2 py-0.5 ${
                       e.impact === 'CRITICAL' ? 'bg-bloomberg-red/20 text-bloomberg-red' :
                       e.impact === 'HIGH' ? 'bg-bloomberg-orange/20 text-bloomberg-orange' :
                       'bg-bloomberg-border text-bloomberg-dim'
@@ -225,7 +225,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t border-bloomberg-border px-6 py-3 mt-8">
-        <div className="flex items-center justify-between text-[10px] font-mono text-bloomberg-muted">
+        <div className="flex items-center justify-between text-[12px] font-mono text-bloomberg-muted">
           <span>GCC WAR COST TRACKER · DATA FOR INFORMATIONAL PURPOSES ONLY · ESTIMATES BASED ON PUBLIC SOURCES</span>
           <span>SOURCES: IATA · BLOOMBERG COMMODITIES · IISS · ARAMCO · QATARENERGY · DP WORLD · LLOYD'S · IMF</span>
         </div>

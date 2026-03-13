@@ -14,6 +14,7 @@ body {
   color: #e5e7eb;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-size: 15px;
 }
 
 #root {
@@ -43,7 +44,7 @@ body {
   100% { transform: translateX(-50%); }
 }
 .ticker-content {
-  animation: ticker 40s linear infinite;
+  animation: ticker 90s linear infinite;
   white-space: nowrap;
 }
 .ticker-content:hover {
